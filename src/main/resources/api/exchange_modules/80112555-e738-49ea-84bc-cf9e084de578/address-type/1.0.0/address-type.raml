@@ -1,0 +1,39 @@
+#%RAML 1.0 DataType
+description: Represents a User address
+properties:
+  'type': 
+    description: address type
+    enum: [HOME, WORK, POSTAL]
+    example: POSTAL
+    required: false         
+  number:
+    type: string
+    description: Address number
+    required: false
+    example: '12345'
+  street:
+    description: address street
+    type: string
+    required: false
+    example: 'Belgrano 1234'
+  unit:
+    description: address unit
+    type: string
+    required: false
+    example: '1 B'
+  city:
+    description: address city
+    type: string
+    required: false
+    example: 'buenos aires'
+  state:
+    description: address state
+    type: string
+    required: false
+    example: 'CABA'
+  zip:
+    description: address zip code
+    type: string
+    required: false
+    example: '12344'
+      

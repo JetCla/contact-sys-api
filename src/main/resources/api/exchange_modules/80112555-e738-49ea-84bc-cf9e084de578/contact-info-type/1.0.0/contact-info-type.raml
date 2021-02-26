@@ -1,0 +1,18 @@
+#%RAML 1.0 DataType
+description: User contact info
+properties:
+  'type': 
+    description: Contact type
+    enum: [EMAIL, CELL]
+    example: CELL
+    required: false
+  'value': 
+    description: Contact description
+    type: string
+    example: 'claudio.desalvo@gmail.com'
+    required: false
+  'required':
+    description: if the value required as a contact info
+    type: boolean
+    example: false
+    required: false

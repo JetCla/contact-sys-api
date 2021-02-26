@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <apikit:config name="Router" api="contact-sys-api.raml" outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" />
+    <flow name="contact-sys-apiFlow" doc:id="a54d05b5-47f9-4e6c-8e00-092a9bc9df9d">
+        <http:listener doc:name="Listener" doc:id="e857a601-27e1-4796-be15-325e2156f8c3" config-ref="expense-sys-api-httpListenerConfig" path="${https.path}" />
+        <apikit:router doc:name="APIkit Router" doc:id="2c715a9f-edff-4805-ac45-5c479c327853" config-ref="Router" />
+    </flow>
+    <flow name="contact-sys-apiFlow1" doc:id="5b7032fa-2c2d-49f4-a8ca-5e0b4d94bbfa">
+        <http:listener doc:name="Listener" doc:id="7b085a91-2afa-459a-bae0-1d61a9d072d5" config-ref="expense-sys-api-httpListenerConfig" path="${https.console}" />
+        <apikit:console doc:name="APIkit Console" doc:id="c4b61fd9-e555-4d2a-800b-2ff247d8dacc" config-ref="Router" />
+    </flow>
+    <flow name="put:\contacts\(id)\address\(addressId):application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\contacts\(id)\address\(addressId):application\json:Router" />
+    </flow>
+    <flow name="put:\contacts\(id)\contactInfo\(addressId):application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\contacts\(id)\contactInfo\(addressId):application\json:Router" />
+    </flow>
+    <flow name="put:\contacts\(id):application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\contacts\(id):application\json:Router" />
+    </flow>
+    <flow name="delete:\contacts\(id)\address\(addressId):Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\contacts\(id)\address\(addressId):Router" />
+    </flow>
+    <flow name="delete:\contacts\(id)\contactInfo\(addressId):Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+                <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\contacts\(id)\contactInfo\(addressId):Router" />
+    </flow>
+    <flow name="delete:\contacts\(id):Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\contacts\(id):Router" />
+    </flow>
+    <flow name="get:\contacts\(id)\address:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    city: "CABA",
+    number: "123",
+    state: "Buenos Aires",
+    street: "Belgrano",
+    "type": "HOME",
+    unit: "PB c",
+    zip: "123"
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\contacts\(id)\contactInfo:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    required: false,
+    "type": "CELL",
+    value: "113071-1004"
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\contacts:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    id: 1,
+    firstName: "Claudio",
+    lastName: "Desalvo",
+    DOB: "1976-10-05",
+    gender: "M",
+    title: "Manager",
+    address: [
+      {
+        city: "CABA",
+        number: "123",
+        state: "Buenos Aires",
+        street: "Belgrano",
+        "type": "HOME",
+        unit: "PB c",
+        zip: "123"
+      }
+    ],
+    contactInfo: [
+      {
+        required: false,
+        "type": "CELL",
+        value: "113071-1004"
+      }
+    ]
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\contacts\(id):Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: 1,
+  firstName: "Claudio",
+  lastName: "Desalvo",
+  DOB: "1976-10-05",
+  gender: "M",
+  title: "Manager",
+  address: [
+    {
+      city: "CABA",
+      number: "123",
+      state: "Buenos Aires",
+      street: "Belgrano",
+      "type": "HOME",
+      unit: "PB c",
+      zip: "123"
+    }
+  ],
+  contactInfo: [
+    {
+      required: false,
+      "type": "CELL",
+      value: "113071-1004"
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\contacts\(id)\address:application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+1]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\contacts\(id)\contactInfo:application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+1]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\contacts:application\json:Router">
+        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+1]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

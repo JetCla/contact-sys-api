@@ -1,0 +1,279 @@
+#%RAML 1.0
+title: Contact System API
+description: The Contact API provides operations on the contact data.
+mediaType: 
+  - application/json
+version: v1
+
+traits:
+  pageable-trait:
+    queryParameters:
+      offset:
+        description: Starting page offset
+        type: integer
+        required: false
+        example: 1
+      limit:
+        description: Limit the number of elements on the response
+        type: integer
+        required: false
+        example: 80
+        default: 100 
+  searchable-trait:
+    queryParameters:
+      firstName:
+        description: User first name
+        required: false
+        type: string
+        example: 'Claudio'
+      lastName:
+        description: User last name
+        required: false
+        type: string
+        example: 'Desalvo'       
+  orderable-trait: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/orderable-trait/1.0.0/orderable-trait.raml  
+
+types:
+  contact-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-type/1.0.0/contact-type.raml
+  address-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/address-type/1.0.0/address-type.raml
+  contact-info-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-info-type/1.0.0/contact-info-type.raml
+
+/contacts:
+  displayName: Contacts
+  get:
+    is: [pageable-trait,searchable-trait,orderable-trait]
+    displayName: List of Contacts
+    description: List of Contacts which can be filtered by Last and first name. The results is paginated.
+    responses:
+      200:
+        body:
+          application/json:
+            type: array
+            items: contact-type              
+            example:
+              value: 
+                - id: 1
+                  firstName: Claudio
+                  lastName: Desalvo
+                  DOB: 1976-10-05
+                  gender: M
+                  title: Manager
+                  address: 
+                    - city: 'CABA'
+                      number: '123'
+                      state: 'Buenos Aires'
+                      street: 'Belgrano'
+                      type: HOME
+                      unit: 'PB c'
+                      zip: '123'
+                  contactInfo: 
+                    - required: false
+                      type: CELL
+                      value: '113071-1004'
+  post:
+    is: []
+    displayName: Add a new Contact
+    description: Add a new Contact. The Contact-info and address are not mandatory to create a contact. 
+    body:
+      application/json:
+        type: contact-type
+        example:
+          firstName: Claudio
+          lastName: Desalvo
+          DOB: 1976-10-05
+          gender: M
+          title: Manager          
+    responses:
+      201:
+        body:
+          application/json:
+            description: ID of the contact created
+            type: integer
+            example: 1
+              
+  /{id}:
+    description: Contacts operations like GEt a contact, create, delete or update, also add address and contact info.
+    displayName: Contacts By ID
+    get:
+      is: []
+      displayName: Get a Contact
+      description: Get a Contact by Id
+      responses:
+        200:
+          body:
+            application/json:
+              type: contact-type              
+              example:
+                value: 
+                  id: 1
+                  firstName: Claudio
+                  lastName: Desalvo
+                  DOB: 1976-10-05
+                  gender: M
+                  title: Manager
+                  address: 
+                    - city: 'CABA'
+                      number: '123'
+                      state: 'Buenos Aires'
+                      street: 'Belgrano'
+                      type: HOME
+                      unit: 'PB c'
+                      zip: '123'
+                  contactInfo: 
+                    - required: false
+                      type: CELL
+                      value: '113071-1004'
+    put:
+      is: []
+      displayName: Update a Contact
+      description: Update a Contact by Id. If address or contact info are provided, will be replaced totally, which means that the current address or contact-info will be deleted and the new ones created.
+      body:
+        application/json:
+          type: contact-type
+          example:
+            firstName: Claudio-2
+            lastName: Desalvo-2
+            DOB: 1976-10-05
+            gender: M
+            title: Manager          
+      responses:
+        202:
+    delete:
+      displayName: Delete a Contact
+      description: Delete a Contact by Id, including address and contact info     
+      responses:
+        200:
+
+    /address:
+      displayName: Address
+      description: address operations like List, detail, Add, remove and update.
+      get:
+        displayName: Address list
+        description: Get the list of address for a contact
+        responses:
+          200:
+            body:
+              application/json:
+                type: array
+                items: address-type              
+                example:
+                  value: 
+                    - city: 'CABA'
+                      number: '123'
+                      state: 'Buenos Aires'
+                      street: 'Belgrano'
+                      type: HOME
+                      unit: 'PB c'
+                      zip: '123'
+      post:
+        displayName: Add a new address
+        description: add a new address to the contact
+        is: []
+        body:
+          application/json:
+            type: address-type
+            example:
+              value:
+                city: 'CABA-2'
+                number: '123-2'
+                state: 'Buenos Aires-2'
+                street: 'Belgrano-2'
+                type: HOME
+                unit: 'PB c-2'
+                zip: '123-2'        
+        responses:
+          201:
+            body:
+              application/json:
+                description: ID of the address created
+                type: integer
+                example: 1      
+
+      /{addressId}:
+        displayName: Address By Id 
+        put:
+          is: []
+          displayName: Update a contact addres
+          description: Update a contact address information by address Id 
+          body:
+            application/json:
+              type: address-type
+              example:
+                value:
+                  city: 'CABA-2'
+                  number: '123-2'
+                  state: 'Buenos Aires-2'
+                  street: 'Belgrano-2'
+                  type: HOME
+                  unit: 'PB c-2'
+                  zip: '123-2'        
+          responses:
+            202:
+
+        delete:
+          displayName: Delete a Contact address 
+          description: Delete a Contact address information by Id     
+          responses:
+            200:
+
+    /contactInfo:
+      displayName: ContactInfo
+      description: ContactInfo operations like List, detail, Add, remove and update.
+      get:
+        displayName: ContactInfo list
+        description: Get the list of ContactInfo for a contact
+        responses:
+          200:
+            body:
+              application/json:
+                type: array
+                items: contact-info-type              
+                example:
+                  value: 
+                    - required: false
+                      type: CELL
+                      value: '113071-1004'
+      post:
+        displayName: Add a new ContactInfo
+        description: add a new ContactInfo to the contact
+        is: []
+        body:
+          application/json:
+            type: contact-info-type
+            example:
+              value:
+                required: false
+                type: CELL
+                value: '113071-1004'     
+        responses:
+          201:
+            body:
+              application/json:
+                description: ID of the ContactInfo created
+                type: integer
+                example: 1      
+
+      /{addressId}:
+        displayName: ContactInfo By Id 
+        put:
+          is: []
+          displayName: Update a ContactInfo
+          description: Update a ContactInfo information by address Id 
+          body:
+            application/json:
+              type: contact-info-type
+              example:
+                value:
+                  required: false
+                  type: CELL
+                  value: '113071-1004'     
+          responses:
+            202:
+
+        delete:
+          displayName: Delete a ContactInfo 
+          description: Delete a ContactInfo information by Id     
+          responses:
+            200:          
+        
+
