@@ -33,7 +33,7 @@ properties:
     required: false
   address:
     type: array
-    items: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/address-type/1.0.0/address-type.raml
+    items: !include ../../address-type/1.0.0/address-type.raml
     required: false
     example:
       - city: 'CABA'
@@ -46,9 +46,9 @@ properties:
   contactInfo:
     type: array
     required: false
-    items: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-info-type/1.0.0/contact-info-type.raml
+    items: !include ../../contact-info-type/1.0.1/contact-info-type.raml
     example: 
-      - 'required': false
+      - preferred: false
         type: CELL
         'value': '113071-1004'
 

@@ -5,7 +5,7 @@ keystore:
   password: "Plecosystems01"
     
 db:
-  host: "myactionsDev.c1faaovla8cl.us-east-1.rds.amazonaws.com"
+  host: "plecodev.c1faaovla8cl.us-east-1.rds.amazonaws.com"
   port: "1433"
   user: "admin"
   password: "![+5MP5TeMM4DZgSVguLpY0w==]"

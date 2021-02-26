@@ -34,9 +34,9 @@ traits:
   orderable-trait: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/orderable-trait/1.0.0/orderable-trait.raml  
 
 types:
-  contact-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-type/1.0.0/contact-type.raml
+  contact-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-type/1.0.1/contact-type.raml
   address-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/address-type/1.0.0/address-type.raml
-  contact-info-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-info-type/1.0.0/contact-info-type.raml
+  contact-info-type: !include exchange_modules/80112555-e738-49ea-84bc-cf9e084de578/contact-info-type/1.0.1/contact-info-type.raml
 
 /contacts:
   displayName: Contacts
@@ -67,7 +67,7 @@ types:
                       unit: 'PB c'
                       zip: '123'
                   contactInfo: 
-                    - required: false
+                    - preferred: false
                       type: CELL
                       value: '113071-1004'
   post:
@@ -120,7 +120,7 @@ types:
                       unit: 'PB c'
                       zip: '123'
                   contactInfo: 
-                    - required: false
+                    - preferred: false
                       type: CELL
                       value: '113071-1004'
     put:
@@ -147,24 +147,6 @@ types:
     /address:
       displayName: Address
       description: address operations like List, detail, Add, remove and update.
-      get:
-        displayName: Address list
-        description: Get the list of address for a contact
-        responses:
-          200:
-            body:
-              application/json:
-                type: array
-                items: address-type              
-                example:
-                  value: 
-                    - city: 'CABA'
-                      number: '123'
-                      state: 'Buenos Aires'
-                      street: 'Belgrano'
-                      type: HOME
-                      unit: 'PB c'
-                      zip: '123'
       post:
         displayName: Add a new address
         description: add a new address to the contact
@@ -219,20 +201,6 @@ types:
     /contactInfo:
       displayName: ContactInfo
       description: ContactInfo operations like List, detail, Add, remove and update.
-      get:
-        displayName: ContactInfo list
-        description: Get the list of ContactInfo for a contact
-        responses:
-          200:
-            body:
-              application/json:
-                type: array
-                items: contact-info-type              
-                example:
-                  value: 
-                    - required: false
-                      type: CELL
-                      value: '113071-1004'
       post:
         displayName: Add a new ContactInfo
         description: add a new ContactInfo to the contact
@@ -242,7 +210,7 @@ types:
             type: contact-info-type
             example:
               value:
-                required: false
+                preferred: false
                 type: CELL
                 value: '113071-1004'     
         responses:
@@ -253,7 +221,7 @@ types:
                 type: integer
                 example: 1      
 
-      /{addressId}:
+      /{contactInfoId}:
         displayName: ContactInfo By Id 
         put:
           is: []
@@ -264,7 +232,7 @@ types:
               type: contact-info-type
               example:
                 value:
-                  required: false
+                  preferred: false
                   type: CELL
                   value: '113071-1004'     
           responses:
