@@ -2,12 +2,7 @@
 output application/json
 ---
 payload groupBy (
-	$.Id  ++ '-' ++
-	$.FirstName  ++ '-' ++
-	$.LastName  ++ '-' ++
-	$.DOB  ++ '-' ++
-	$.Gender  ++ '-' ++
-	$.Title
+	$.Id 
 	) pluck ((value,key,index) -> {
 	"Identification" : {
         "Id": value[0].Id,
@@ -18,18 +13,20 @@ payload groupBy (
         "Title": value[0].Title
     },
     "Communication": value distinctBy ($.ContactInfoId) map {
-		"type": $.ContactInfoType,
-		"value": $.Value,
-		"preferred" : $.Preferred
+    	"Id": $.contactInfoId,
+		"Type": $.ContactInfoType,
+		"Value": $.Value,
+		"Preferred" : $.Preferred
     },
     "Addess": value distinctBy ($.AddressId) map {
-    	"type ": $.AddressType,
-		"number": $.Number,
-		"street": $.Street,
+    	"Id": $.AddressId,
+    	"Type ": $.AddressType,
+		"Number": $.Number,
+		"Street": $.Street,
 		"Unit": $.Unit,
 		"City": $.City,
 		"State": $.State,
-		"zipcode": $.ZipCode
+		"Zipcode": $.ZipCode
     }
 			
 	})

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+<mule xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:email="http://www.mulesoft.org/schema/mule/email"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
-	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-	<global-property doc:name="Global Property" doc:id="a2893f23-b648-42b1-840e-867ffe70b84e" name="env" value="dev" />
     <http:listener-config name="expense-sys-api-httpListenerConfig">
         <http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS" tlsContext="TLS_Context">
 		</http:listener-connection>
@@ -23,9 +22,12 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	
 	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="3a512641-ac4e-4a98-b75d-45ea6c0f659e" file="contact-sys-api-${env}.yaml" key="${runtime.key}" />
 
-	<configuration doc:name="Configuration" doc:id="bdb736ef-4563-4813-a51c-dd54d219a240" defaultErrorHandler-ref="global-error-handlerError_Handler" />
+	<configuration doc:name="Configuration" doc:id="bdb736ef-4563-4813-a51c-dd54d219a240" defaultErrorHandler-ref="global-error-handlerError_Handler" >
+	</configuration>
 	<configuration-properties doc:name="Configuration properties" doc:id="9e0ed79e-a431-4e95-a9be-4dc64f5baaff" file="contact-sys-api-global.yaml" />
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="63a814c5-4d90-4e14-91a7-df4b9fd48bcd" >
 		<db:mssql-connection host="${secure::db.host}" port="${secure::db.port}" user="${secure::db.user}" password="${secure::db.password}" databaseName="${secure::db.name}" transactionIsolation="READ_COMMITTED"/>
 	</db:config>
+	<global-property doc:name="Global Property" doc:id="22c5d7d9-f97c-4b05-8e9f-89e9064f34fc" name="runtime.key" value="abcd#efgh123@456" />
+	<global-property doc:name="Global Property" doc:id="37ea9ca6-1898-420f-a737-54d3a90fcb4a" name="env" value="dev" />
 </mule>

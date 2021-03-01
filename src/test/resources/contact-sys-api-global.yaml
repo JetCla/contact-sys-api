@@ -5,4 +5,4 @@ https:
     console: "/console/"
 
 db:
-  config: 'Database_Config'
+  config: 'Test_Database_Config'

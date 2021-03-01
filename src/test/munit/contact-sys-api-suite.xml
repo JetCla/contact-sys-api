@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:dbserver="http://www.mulesoft.org/schema/mule/dbserver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/dbserver http://www.mulesoft.org/schema/mule/dbserver/current/mule-dbserver.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<munit:config name="contact-sys-api-suite.xml" />
+	<dbserver:config name="MUnit_DB_Server_Config" doc:name="MUnit DB Server Config" doc:id="996ea2fb-4771-4b32-9afe-a0129b3f14a4" >
+		<dbserver:connection database="contactDbTest" connectionStringParameters="MODE=MySQL" sqlFile="initDB.sql"/>
+	</dbserver:config>
+	<db:config name="Test_Database_Config" doc:name="Database Config" doc:id="a49751d0-e462-4ba0-bb4d-b4ebef4ff995" >
+		<db:generic-connection url="jdbc:h2:tcp://127.0.0.1/mem:contactDbTest" driverClassName="org.h2.Driver" />
+	</db:config>	<munit:test name="get:\contacts:Router-test" doc:id="e9aaac2b-da89-4504-b5e5-2348902e1d2a" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="066e7605-47d8-47c2-b7c6-2c24d6f42d55" >
+				<munit:payload value="#[readUrl('classpath://getcontactsRoutertest/set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getcontactsRoutertest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://getcontactsRoutertest/set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\contacts:Router" doc:id="74f5fe9f-ba50-4fd8-9109-2fb6c4f3e0f0" name="get:\contacts:Router"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="4961b99b-0b1e-4414-9048-16f543abac19" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getcontactsRoutertest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get:\contacts\(id):Router-test" doc:id="0118f59f-7759-4a92-9a60-4c491e65d198" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="07380500-b893-40ea-852d-329af0eab4e0" >
+				<munit:payload value="#[readUrl('classpath://getcontactsidRoutertest/set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://getcontactsidRoutertest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://getcontactsidRoutertest/set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\contacts\(id):Router" doc:id="3e8f7fd4-be93-4321-917d-cfb2aaa457aa" name="get:\contacts\(id):Router"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="4f46cffc-c38e-4955-af92-4361f2e9d15e" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getcontactsidRoutertest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+</mule>

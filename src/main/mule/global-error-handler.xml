@@ -8,22 +8,22 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
 	<error-handler name="global-error-handlerError_Handler" doc:id="5264dbcb-0b9f-4282-985c-2c72db08869f">
-		
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1e2ec81a-9ca7-44da-a422-d8702f5745cf" type="ANY">
-			<ee:transform doc:name="Transform Message" doc:id="ad777e37-5644-4723-82b9-2f7ee58500e7" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4a2f716c-adf8-4d4a-bc4f-c9c616a4e9c2" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="ad777e37-5644-4723-82b9-2f7ee58500e7">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	"replyStatus": {
+	"error": {
 		"message": error.description as String default "Unexpected Error while calling Contact-sys-api.",
-		"payload": error.errorMessage.payload
+		"payload": payload,
+		"params": attributes.uriParams ++ attributes.queryParams
 	}
 }]]></ee:set-payload>
 				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
 output application/java
 ---
 409]]></ee:set-variable>

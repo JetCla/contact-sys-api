@@ -4,6 +4,9 @@
     <flow name="contact-sys-apiFlow" doc:id="a54d05b5-47f9-4e6c-8e00-092a9bc9df9d">
         <http:listener doc:name="Listener" doc:id="e857a601-27e1-4796-be15-325e2156f8c3" config-ref="expense-sys-api-httpListenerConfig" path="${https.path}">
             <http:response statusCode="#[vars.httpStatus default 200]" reasonPhrase="#[vars.reason default '']" />
+			<http:error-response statusCode="#[vars.httpStatus default 500]" reasonPhrase="#[vars.reason default '']">
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
         </http:listener>
         <apikit:router doc:name="APIkit Router" doc:id="2c715a9f-edff-4805-ac45-5c479c327853" config-ref="Router" />
     </flow>
@@ -12,12 +15,7 @@
         <apikit:console doc:name="APIkit Console" doc:id="c4b61fd9-e555-4d2a-800b-2ff247d8dacc" config-ref="Router" />
     </flow>
     <flow name="get:\contacts\(id):Router">
-        <ee:transform>
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <db:select doc:name="Select" doc:id="9361fb05-c127-48d1-b79c-366febfc68a0" config-ref="Database_Config">
+        <db:select doc:name="Select" doc:id="9361fb05-c127-48d1-b79c-366febfc68a0" config-ref="${db.config}">
             <db:sql><![CDATA[select 
 c.Id,
 c.FirstName,
@@ -30,27 +28,52 @@ ci.Type ContactInfoType,
 ci.Value,
 ci.Preferred,
 a.Id AddressId,
-a.[type] AddressType,
-a.[Number] ,
+a.type AddressType,
+a.Number ,
 a.Street ,
 a.Unit ,
 a.City ,
-a.[State] ,
+a.State ,
 a.ZipCode 
-from Contact c with (nolock)
+from Contact c
 Left join ContactInfo ci on c.ID = ci.ContactId
 Left join Address a on a.ContactId = c.ID
 where c.Id = :Id]]></db:sql>
-            <db:input-parameters><![CDATA[#[{Id: vars.id}]]]></db:input-parameters>
+            <db:input-parameters><![CDATA[#[{Id: attributes.uriParams.'id'}]]]></db:input-parameters>
         </db:select>
-        <ee:transform doc:name="Response" doc:id="11050b75-d9a1-4269-92cc-a64531de322e">
+        <choice doc:name="Choice" doc:id="25de579f-df55-475d-a0a3-01fff554d54c" >
+			<when expression="#[sizeOf(payload) &gt; 0]">
+				<ee:transform doc:name="Response" doc:id="11050b75-d9a1-4269-92cc-a64531de322e">
             <ee:message>
 				<ee:set-payload resource="contactResponse.dwl" />
             </ee:message>
         </ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Contact Not Found" doc:id="19ea1990-cdf7-4ae8-9ada-d38473e97d0a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+'contact not found'
+]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+						<ee:set-variable variableName="reason" ><![CDATA[%dw 2.0
+output application/java
+---
+'contact not found']]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
     </flow>
     <flow name="get:\contacts:Router">
-        <db:select doc:name="Select" doc:id="35eee087-9352-4568-a8dc-c5bbac8fd469" config-ref="Database_Config">
+        <db:select doc:name="Select" doc:id="35eee087-9352-4568-a8dc-c5bbac8fd469" config-ref="${db.config}">
             <db:sql><![CDATA[select 
 c.Id,
 c.FirstName,
@@ -63,14 +86,14 @@ ci.Type ContactInfoType,
 ci.Value,
 ci.Preferred,
 a.Id AddressId,
-a.[type] AddressType,
-a.[Number] ,
+a.type AddressType,
+a.Number ,
 a.Street ,
 a.Unit ,
 a.City ,
-a.[State] ,
+a.State ,
 a.ZipCode 
-from Contact c with (nolock)
+from Contact c 
 Left join ContactInfo ci on c.ID = ci.ContactId
 Left join Address a on a.ContactId = c.ID]]></db:sql>
         </db:select>
@@ -80,18 +103,85 @@ Left join Address a on a.ContactId = c.ID]]></db:sql>
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="put:\contacts\(id)\address\(addressId):application\json:Router">
-        <ee:transform>
+    <sub-flow name="ExistsContactIdFlow" doc:id="249532c5-b3b8-40c5-b8cd-e088a185de24" >
+		<db:select doc:name="Contact By Id" doc:id="51ab565f-54de-4988-ad5c-c64b6262c134" config-ref="${db.config}" target="contact" >
+			<db:sql ><![CDATA[select c.Id from Contact c with (nolock)
+where c.Id = :Id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{Id: vars.Id}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="61a63f5a-3bb9-4ea9-951c-5d84dcc9ebcf" >
+			<when expression="#[sizeOf(vars.contact default []) == 0]">
+				<set-variable value="404" doc:name="HTTP STATUS" doc:id="df4505fe-9507-4fee-b201-08a1702d4ab8" variableName="httpStatus"/>
+				<raise-error doc:name="Raise error" doc:id="38266209-1855-4d57-92bb-26f5495fad4f" type="CONTACT: CONTACT_NOT_FOUND" description="Contact Not Found"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Contact Found" doc:id="9f91b00b-93bb-4b96-837d-83493dd024ce" message="Cotnact  Found"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<flow name="put:\contacts\(id)\address\(addressId):application\json:Router">
+        <logger level="INFO" message="put:\contacts\(id)\address\(addressId):application\json:Router" />
+		<ee:transform doc:name="variables">
             <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-                <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
+                <ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+                <ee:set-variable variableName="addressId"><![CDATA[attributes.uriParams.'addressId']]></ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="put:\contacts\(id)\address\(addressId):application\json:Router" />
+		<flow-ref doc:name="Exists Contact Id" doc:id="8d8d7f1e-c034-436f-b7c7-1c6de2a39952" name="ExistsContactIdFlow"/>
+		<db:select doc:name="Address By Id" doc:id="13df0021-726b-4ab5-a8af-6b87c19b2c42" config-ref="${db.config}" target="address">
+					<db:sql><![CDATA[select Id from address where Id = :Id;]]></db:sql>
+					<db:input-parameters><![CDATA[#[{Id: vars.addressId}]]]></db:input-parameters>
+				</db:select>
+		<choice doc:name="Choice" doc:id="44893d3f-fa14-499f-9e27-4e948cdab4f8">
+					<when expression="#[sizeOf(vars.address default []) &gt; 0]">
+						<db:update doc:name="Update Address by Id" doc:id="7e98d26d-3083-492c-b2d9-9700ac8ffde9" config-ref="${db.config}">
+							<db:sql><![CDATA[#['update address set ' 
+++ (if (isBlank(payload.'type')) 'type=type,' else 'type=:type,')
+++ (if (isBlank(payload.street)) 'street=street,' else 'street=:street,')
+++ (if (isBlank(payload.number)) 'number=number,' else 'number=:number,')
+++ (if (isBlank(payload.unit)) ' unit=unit,' else 'unit=:unit,')
+++ (if (isBlank(payload.city)) 'city=city,' else 'city=:city,')
+++ (if (isBlank(payload.state)) 'state=state,' else 'state=:state,')
+++ (if (isBlank(payload.zipCode)) 'zipCode=zipCode' else 'zipCode=:zipCode')
+++ ' where contactId = :contactId and Id = :addressId']]]></db:sql>
+							<db:input-parameters><![CDATA[#[{contactId: vars.id, 
+addressId: vars.addressId,
+'type': payload.'type' , 
+street: payload.street , 
+number: payload.number, 
+unit: payload.unit,
+city: payload.city,
+zipCode: payload.zipCode,
+state: payload.state
+}]]]></db:input-parameters>
+						</db:update>
+					</when>
+					<otherwise>
+						<ee:transform doc:name="Address Not Found" doc:id="4655b2d5-f14d-42b3-aac9-fb9322e69b40">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+'address not found'
+]]></ee:set-payload>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+								<ee:set-variable variableName="reason"><![CDATA[%dw 2.0
+output application/java
+---
+'address not found']]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</otherwise>
+				</choice>
 		<ee:transform doc:name="Transform Message" doc:id="2bac48d5-bf5c-41b1-97ee-ce49bed14515" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
@@ -99,17 +189,60 @@ output application/java
 		</ee:transform>
     </flow>
     <flow name="put:\contacts\(id)\contactInfo\(contactInfoId):application\json:Router">
-        <ee:transform>
+        <logger level="INFO" message="put:\contacts\(id)\contactInfo\(contactInfoId):application\json:Router" />
+		<ee:transform doc:name="Variables">
             <ee:variables>
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
                 <ee:set-variable variableName="contactInfoId">attributes.uriParams.'contactInfoId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="put:\contacts\(id)\contactInfo\(contactInfoId):application\json:Router" />
+		<flow-ref doc:name="Exists Contact Id" doc:id="f7172b7b-85f7-4e94-bd07-4225a487483a" name="ExistsContactIdFlow"/>
+		<db:select doc:name="Contact Info By Id" doc:id="8fef8eb4-3f94-4231-82b2-d77831c3f3d6" config-ref="${db.config}" target="contact">
+			<db:sql ><![CDATA[select Id from address where Id = :Id;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{Id: vars.contactInfoId}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="42bc7f75-b585-4fb9-a3e5-2c5dff9c5332" >
+			<when expression="#[sizeOf(vars.contact default []) &gt; 0]">
+				<db:update doc:name="Update Contact Info By Id" doc:id="68cc4ff9-6cb3-48c8-8f2b-62b88191ead9" config-ref="${db.config}">
+					<db:sql ><![CDATA[#['update ContactInfo set ' 
+++ (if (isBlank(payload.'type')) 'type=type,' else 'type=:type,')
+++ (if (isBlank(payload.value)) 'value=value,' else 'value=:value,')
+++ (if (isBlank(payload.preferred)) 'preferred=preferred' else 'preferred=:preferred')
+++ ' where contactId = :contactId and Id = :contactInfoId']]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{contactId: vars.id, 
+contactInfoId: vars.contactInfoId,
+'type': payload.'type',
+value: payload.value,
+preferred: payload.preferred
+}]]]></db:input-parameters>
+				</db:update>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Contact Info Not Found" doc:id="244be22b-e61d-4b09-8c25-e2c43167fa2d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+'contact info not found'
+]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+						<ee:set-variable variableName="reason" ><![CDATA[%dw 2.0
+output application/java
+---
+'contact info not found']]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
 		<ee:transform doc:name="Transform Message" doc:id="28f65aba-507f-4235-ac0b-77bbbc54739e" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
@@ -117,34 +250,54 @@ output application/java
 		</ee:transform>
     </flow>
     <flow name="put:\contacts\(id):application\json:Router">
-        <ee:transform>
+        <logger level="INFO" message="put:\contacts\(id):application\json:Router" />
+		<ee:transform doc:name="Variables">
             <ee:variables>
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="put:\contacts\(id):application\json:Router" />
+		<flow-ref doc:name="Exists Contact Id" doc:id="d54c7637-f805-4aee-b134-e14c819fad4e" name="ExistsContactIdFlow"/>
+		<db:update doc:name="Update Contact" doc:id="02bdece0-163a-478d-8fae-e192c7ee4eb9" config-ref="${db.config}">
+			<db:sql ><![CDATA[#['update Contact set ' 
+++ (if (isBlank(payload.firstName)) 'firstName = firstName,' else ' firstName = :firstName, ')
+++ (if (isBlank(payload.lastName)) 'lastName=lastName,' else ' lastName= :lastName, ')
+++ (if (isBlank(payload.DOB)) 'DOB=DOB,' else 'c :DOB,')
+++ (if (isBlank(payload.gender)) ' gender =gender,' else ' gender = :gender,')
+++ (if (isBlank(payload.title)) 'title =title' else 'title = :title')
+++ ' where Id = :Id']]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{Id: vars.Id, firstName: payload.firstName, lastName: payload.lastName, DOB: payload.DOB, gender: payload.gender, title: payload.title}]]]></db:input-parameters>
+		</db:update>
 		<ee:transform doc:name="Transform Message" doc:id="b2ded08c-dd91-42ed-a1de-4da07665ad76" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[200]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
     </flow>
     <flow name="delete:\contacts\(id)\address\(addressId):Router">
-        <ee:transform>
+        <logger level="INFO" message="delete:\contacts\(id)\address\(addressId):Router" />
+		<ee:transform doc:name="Variables">
             <ee:variables>
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
                 <ee:set-variable variableName="addressId">attributes.uriParams.'addressId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="delete:\contacts\(id)\address\(addressId):Router" />
+		<flow-ref doc:name="Exists Contact Id" doc:id="b4846503-c437-4dbf-b8d8-4b07a2828c7d" name="ExistsContactIdFlow"/>
+		<db:delete doc:name="Delete address by Id" doc:id="2a97bb54-6fd7-42d9-bb52-9d2132f3db01" config-ref="${db.config}">
+			<db:sql ><![CDATA[delete from address 
+where id = :AddressId and ContactId = :ContactId  ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ContactId: vars.Id, AddressId: vars.addressId}]]]></db:input-parameters>
+		</db:delete>
 		<ee:transform doc:name="Transform Message" doc:id="8bfd2d52-016d-4eeb-bf1f-ffed768036b7" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
@@ -152,17 +305,23 @@ output application/java
 		</ee:transform>
     </flow>
     <flow name="delete:\contacts\(id)\contactInfo\(contactInfoId):Router">
-        <ee:transform>
+        <logger level="INFO" message="delete:\contacts\(id)\contactInfo\(contactInfoId):Router" />
+		<ee:transform doc:name="Variables">
             <ee:variables>
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
                 <ee:set-variable variableName="contactInfoId">attributes.uriParams.'contactInfoId'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <logger level="INFO" message="delete:\contacts\(id)\contactInfo\(contactInfoId):Router" />
+		<flow-ref doc:name="Exists Contact Id" doc:id="b0718ecc-b514-4bbf-9248-3f6ade227850" name="ExistsContactIdFlow"/>
+		<db:delete doc:name="Delete Contact Info by Id" doc:id="7f2465a4-4057-4e18-9a51-26191fb92e74" config-ref="${db.config}">
+			<db:sql ><![CDATA[delete from ContactInfo
+where id = :ContactInfoId and ContactId = :ContactId ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ContactId: vars.Id, ContactInfoId: vars.contactInfoId}]]]></db:input-parameters>
+		</db:delete>
 		<ee:transform doc:name="Transform Message" doc:id="60d2391e-84eb-4eae-83a6-d80f3d2f49e5" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
@@ -170,17 +329,18 @@ output application/java
 		</ee:transform>
     </flow>
     <flow name="delete:\contacts\(id):Router">
-        <ee:transform>
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
         <logger level="INFO" message="delete:\contacts\(id):Router" />
-		<db:delete doc:name="Delete" doc:id="fae9d68e-f4c0-4038-82ce-4a42acd471f6" config-ref="Database_Config">
-			<db:sql ><![CDATA[delete from contacinfo where contactId = :Id;
+		<ee:transform doc:name="Variables" doc:id="5e7017d0-7884-47d7-8a1a-3adc5d7a76af">
+			<ee:variables>
+				<ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Exists Contact Id" doc:id="81785d57-07fa-4c00-b3e0-3d0f975b3aad" name="ExistsContactIdFlow"/>
+		<db:delete doc:name="Delete Contact By Id" doc:id="fae9d68e-f4c0-4038-82ce-4a42acd471f6" config-ref="${db.config}">
+			<db:sql ><![CDATA[delete from ContactInfo where contactId = :Id;
 delete from address where contactId = :Id;
 delete from contact where id = :Id;]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{Id: vars.id}]]]></db:input-parameters>
+			<db:input-parameters ><![CDATA[#[{Id: vars.Id}]]]></db:input-parameters>
 		</db:delete>
 		<ee:transform doc:name="Transform Message" doc:id="3ffa0c3d-4062-40b0-9292-844ac489ca4c" >
 			<ee:message >
@@ -198,7 +358,21 @@ output application/json
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <flow-ref doc:name="Exists Contact Id" doc:id="85e79410-45c3-4c09-9811-8ed58a377ed8" name="ExistsContactIdFlow"/>
+		<db:insert doc:name="Add Address" doc:id="d6a5db81-3838-44b9-b2a5-e2ad147acf2f" config-ref="${db.config}">
+			<db:sql ><![CDATA[insert into address (ContactId, Type, Number,Street,Unit,City,State,ZipCode) values (:contactId, :type, :number, :street, :unit,:city ,:state, :zipCode);
+p]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{contactId: vars.id, 
+'type': payload.'type', 
+street: payload.street, 
+number: payload.number, 
+unit: payload.unit,
+city: payload.city,
+zipCode: payload.zipCode,
+state: payload.state
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -213,23 +387,45 @@ output application/json
                 <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
             </ee:variables>
         </ee:transform>
-        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+        <flow-ref doc:name="Exists Contact Id" doc:id="3c316b0a-dec6-4bb1-87a6-cb8613887072" name="ExistsContactIdFlow"/>
+		<db:insert doc:name="Add Contact Info" doc:id="853aee8a-0193-4cbe-85f8-479eff645be2" config-ref="${db.config}">
+			<db:sql ><![CDATA[insert into ContactInfo (ContactId, Type, value, preferred) values (:ContactId, :type,:value, :preferred);]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{contactId: vars.id, 
+'type': payload.'type',
+value: payload.value,
+preferred: payload.preferred
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 1]]></ee:set-payload>
             </ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[201]]></ee:set-variable>
+			</ee:variables>
         </ee:transform>
     </flow>
     <flow name="post:\contacts:application\json:Router">
-        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+		<db:insert doc:name="Insert" doc:id="cb046533-df3f-4c3d-a8da-86e533811867" config-ref="${db.config}" autoGenerateKeys="true">
+			<db:sql ><![CDATA[insert into Contact (FirstName, LastName, DOB, Gender, Title) values (:firstName, :lastName, :DOB, :gender, :title);]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{firstName: payload.firstName, lastName: payload.lastName, DOB: payload.DOB, gender: payload.gender, title: payload.title}]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="Id" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="05c157e4-8899-4793-a529-4bfeb2b04f71" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-1]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+payload.generatedKeys['GENERATED_KEYS']]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[201]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
     </flow>
 </mule>
