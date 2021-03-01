@@ -361,7 +361,7 @@ output application/json
         <flow-ref doc:name="Exists Contact Id" doc:id="85e79410-45c3-4c09-9811-8ed58a377ed8" name="ExistsContactIdFlow"/>
 		<db:insert doc:name="Add Address" doc:id="d6a5db81-3838-44b9-b2a5-e2ad147acf2f" config-ref="${db.config}">
 			<db:sql ><![CDATA[insert into address (ContactId, Type, Number,Street,Unit,City,State,ZipCode) values (:contactId, :type, :number, :street, :unit,:city ,:state, :zipCode);
-p]]></db:sql>
+]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{contactId: vars.id, 
 'type': payload.'type', 
 street: payload.street, 
