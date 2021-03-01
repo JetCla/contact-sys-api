@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "ad9f6c5c-b065-4f32-8fd5-2392a4aa6877",
+		"name": "Contact Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "List Contacts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Contacts By Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/10",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"10"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a new contact",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"mario\",\n    \"lastName\": \"Peralta\",\n    \"DOB\": \"1990-01-01\",\n    \"gender\": \"M\",\n    \"title\": \"contact\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a new contact address",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"type\": \"POSTAL\",\n    \"number\": \"1212\",\n    \"street\": \"Belgrano sad\",\n    \"unit\": \"PB C\",\n    \"city\": \"CABA\",\n    \"state\": \"Buenos Aires\",\n    \"zipCode\": \"5565\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/9/address",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"9",
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a new contact Info",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"EMAIL\",\n    \"value\": \"pepe@pepe.com\",\n    \"preferred\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/1/contactInfo",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"1",
+						"contactInfo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update  contact",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"MARIA\",\n    \"lastName\": \"Peralta\",\n    \"DOB\": \"1990-01-01\",\n    \"gender\": \"F\",\n    \"title\": \"CIO\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/10",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"10"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update  contact Address",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"type\": \"POSTAL\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/9/address/3",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"9",
+						"address",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update  contact Info",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"EMAIL\",\n    \"value\": \"pepe@pepe.com\",\n    \"preferred\": false\n}\n\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/10/contactInfo/1",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"10",
+						"contactInfo",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Contact By Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/4",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Contact Info By Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/10/contactInfo/1",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"10",
+						"contactInfo",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Contact Address By Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://{{contactUrl}}/contacts/10/address/1",
+					"protocol": "https",
+					"host": [
+						"{{contactUrl}}"
+					],
+					"path": [
+						"contacts",
+						"10",
+						"address",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

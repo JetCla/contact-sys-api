@@ -261,7 +261,7 @@ output application/json
 			<db:sql ><![CDATA[#['update Contact set ' 
 ++ (if (isBlank(payload.firstName)) 'firstName = firstName,' else ' firstName = :firstName, ')
 ++ (if (isBlank(payload.lastName)) 'lastName=lastName,' else ' lastName= :lastName, ')
-++ (if (isBlank(payload.DOB)) 'DOB=DOB,' else 'c :DOB,')
+++ (if (isBlank(payload.DOB)) 'DOB=DOB,' else 'DOB= :DOB,')
 ++ (if (isBlank(payload.gender)) ' gender =gender,' else ' gender = :gender,')
 ++ (if (isBlank(payload.title)) 'title =title' else 'title = :title')
 ++ ' where Id = :Id']]]></db:sql>
@@ -389,7 +389,7 @@ output application/json
         </ee:transform>
         <flow-ref doc:name="Exists Contact Id" doc:id="3c316b0a-dec6-4bb1-87a6-cb8613887072" name="ExistsContactIdFlow"/>
 		<db:insert doc:name="Add Contact Info" doc:id="853aee8a-0193-4cbe-85f8-479eff645be2" config-ref="${db.config}">
-			<db:sql ><![CDATA[insert into ContactInfo (ContactId, Type, value, preferred) values (:ContactId, :type,:value, :preferred);]]></db:sql>
+			<db:sql ><![CDATA[insert into ContactInfo (ContactId, Type, value, preferred) values (:contactId, :type, :value, :preferred);]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{contactId: vars.id, 
 'type': payload.'type',
 value: payload.value,
