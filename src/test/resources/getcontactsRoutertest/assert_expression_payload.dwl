@@ -13,20 +13,22 @@ payload must equalTo([
     },
     Communication: [
       {
-        "type": "CELL",
-        value: "12345667",
-        preferred: true
+        Id: 1,
+        Type: "CELL",
+        Value: "12345667",
+        Preferred: true
       }
     ],
     Addess: [
       {
-        "type ": "HOME",
-        number: "1212",
-        street: "Belgrano",
+        Id: 1,
+        "Type ": "HOME",
+        Number: "1212",
+        Street: "Belgrano",
         Unit: "PB C",
         City: "CABA",
         State: "Buenos Aires",
-        zipcode: "1212"
+        Zipcode: "1212"
       }
     ]
   }

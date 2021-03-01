@@ -7,22 +7,24 @@
     "host": "localhost:8082",
     "accept-encoding": "gzip, deflate, br",
     "connection": "keep-alive",
-    "content-length": "123"
+    "content-length": "168"
   },
   "clientCertificate": null,
   "method": "POST",
   "scheme": "https",
   "queryParams": {},
-  "requestUri": "/contacts",
+  "requestUri": "/contacts/1/address",
   "queryString": "",
   "version": "HTTP/1.1",
-  "maskedRequestPath": "/contacts",
+  "maskedRequestPath": "/contacts/1/address",
   "listenerPath": "/*",
-  "relativePath": "/contacts",
   "localAddress": "/127.0.0.1:8082",
-  "uriParams": {},
-  "rawRequestUri": "/contacts",
-  "rawRequestPath": "/contacts",
-  "remoteAddress": "/127.0.0.1:51376",
-  "requestPath": "/contacts"
+  "relativePath": "/contacts/1/address",
+  "uriParams": {
+    "id": "1"
+  },
+  "rawRequestUri": "/contacts/1/address",
+  "rawRequestPath": "/contacts/1/address",
+  "remoteAddress": "/127.0.0.1:52646",
+  "requestPath": "/contacts/1/address"
 }

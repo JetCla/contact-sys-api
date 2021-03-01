@@ -1,8 +1,0 @@
-https:
-    port: "8082"
-    host: "0.0.0.0"
-    path: "/*"
-    console: "/console/"
-
-db:
-  config: 'Test_Database_Config'

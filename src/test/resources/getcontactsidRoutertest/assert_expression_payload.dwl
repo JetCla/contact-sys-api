@@ -2,31 +2,33 @@
 import * from dw::test::Asserts
 ---
 payload must equalTo([
-  {
-    "Identification": {
-      "Id": 1,
-      "FirstName": "claudio",
-      "LastName": "desalvo",
-      "DOB": "1976-10-05T00:00:00",
-      "Gender": "M",
-      "Title": "Manager"
+{
+    Identification: {
+      Id: 1,
+      FirstName: "claudio",
+      LastName: "desalvo",
+      DOB: "1976-10-05T00:00:00",
+      Gender: "M",
+      Title: "Manager"
     },
-    "Communication": [
+    Communication: [
       {
-        "type": "CELL",
-        "value": "12345667",
-        "preferred": true
+        Id: 1,
+        Type: "CELL",
+        Value: "12345667",
+        Preferred: true
       }
     ],
-    "Addess": [
+    Addess: [
       {
-        "type ": "HOME",
-        "number": "1212",
-        "street": "Belgrano",
-        "Unit": "PB C",
-        "City": "CABA",
-        "State": "Buenos Aires",
-        "zipcode": "1212"
+        Id: 1,
+        "Type ": "HOME",
+        Number: "1212",
+        Street: "Belgrano",
+        Unit: "PB C",
+        City: "CABA",
+        State: "Buenos Aires",
+        Zipcode: "1212"
       }
     ]
   }

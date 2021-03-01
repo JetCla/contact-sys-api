@@ -3,6 +3,3 @@ https:
     host: "0.0.0.0"
     path: "/*"
     console: "/console/*"
-
-db:
-  config: 'Database_Config'

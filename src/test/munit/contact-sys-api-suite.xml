@@ -10,12 +10,7 @@
 http://www.mulesoft.org/schema/mule/dbserver http://www.mulesoft.org/schema/mule/dbserver/current/mule-dbserver.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<munit:config name="contact-sys-api-suite.xml" />
-	<dbserver:config name="MUnit_DB_Server_Config" doc:name="MUnit DB Server Config" doc:id="996ea2fb-4771-4b32-9afe-a0129b3f14a4" >
-		<dbserver:connection database="contactDbTest" connectionStringParameters="MODE=MySQL" sqlFile="initDB.sql"/>
-	</dbserver:config>
-	<db:config name="Test_Database_Config" doc:name="Database Config" doc:id="a49751d0-e462-4ba0-bb4d-b4ebef4ff995" >
-		<db:generic-connection url="jdbc:h2:tcp://127.0.0.1/mem:contactDbTest" driverClassName="org.h2.Driver" />
-	</db:config>	<munit:test name="get:\contacts:Router-test" doc:id="e9aaac2b-da89-4504-b5e5-2348902e1d2a" >
+	<munit:test name="get:\contacts:Router-test" doc:id="e9aaac2b-da89-4504-b5e5-2348902e1d2a" >
 		<munit:behavior >
 			<munit:set-event doc:name="Set Input" doc:id="066e7605-47d8-47c2-b7c6-2c24d6f42d55" >
 				<munit:payload value="#[readUrl('classpath://getcontactsRoutertest/set-event_payload.dwl')]" encoding="UTF-8" />
@@ -37,6 +32,48 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 			</munit-tools:assert>
 		</munit:validation>
 	</munit:test>
+	<munit:before-test name="contact-sys-api-suiteBefore_Test" doc:id="05409c10-41db-4c97-b48b-16ebc4f96797" >
+		<db:execute-ddl doc:name="Execute DDL" doc:id="45f22726-3ce7-4f7f-a7ad-b43884e11f17" config-ref="Database_Config">
+			<db:sql ><![CDATA[DROP TABLE IF EXISTS Address;
+DROP TABLE IF EXISTS ContactInfo;
+DROP TABLE IF EXISTS Contact;
+
+
+Create table Contact (
+    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY CLUSTERED,
+    FirstName nvarchar(250)  null ,
+    LastName nvarchar(250)  null ,
+    DOB DATE  null,
+    Gender char(1) null,
+    Title nvarchar(255)  null,
+);
+
+create table ContactInfo (
+    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY CLUSTERED,
+    ContactId int not null FOREIGN KEY REFERENCES Contact (Id),
+    [type] nvarchar(50)  null, 
+    [value] nvarchar(255)  null,
+    preferred bit not null default 0
+);
+
+create table [Address] (
+    [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY CLUSTERED,
+    ContactId int not null FOREIGN KEY REFERENCES Contact (Id),
+    [type] nvarchar(50)  null,
+    [Number] nvarchar(50) null,
+    Street nvarchar(255) null,
+    Unit nvarchar(50) null,
+    City nvarchar(255) null,
+    [State] nvarchar(255) NULL,
+    ZipCode nvarchar(50) null
+);
+
+insert into Contact (FirstName, LastName, DOB, Gender, Title) values ('claudio', 'desalvo','1976-10-05','M','Manager'); 
+insert into ContactInfo (ContactId, Type, value, preferred) values (1, 'CELL','12345667', 1); 
+insert into address (ContactId, Type, Number,Street,Unit,City,State,ZipCode) values (1, 'HOME','1212','Belgrano','PB C','CABA','Buenos Aires','1212');
+]]></db:sql>
+		</db:execute-ddl>
+	</munit:before-test>
 	<munit:test name="get:\contacts\(id):Router-test" doc:id="0118f59f-7759-4a92-9a60-4c491e65d198" >
 		<munit:behavior >
 			<munit:set-event doc:name="Set Input" doc:id="07380500-b893-40ea-852d-329af0eab4e0" >
@@ -54,6 +91,72 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 			<munit-tools:assert doc:name="Assert payload" doc:id="4f46cffc-c38e-4955-af92-4361f2e9d15e" message="The payload does not match">
 				<munit-tools:that ><![CDATA[#[%dw 2.0
 import getcontactsidRoutertest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\contacts:application\json:Router-test" doc:id="27d679d0-bc9a-4c6b-adc3-048bcf97f4d1" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="f3dc1418-7a93-415a-a403-5e5e9404341a" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postcontactsapplicationjsonRoutertest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postcontactsapplicationjsonRoutertest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://postcontactsapplicationjsonRoutertest/set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\contacts:application\json:Router" doc:id="3cb12378-5f42-4971-b20d-57933407d04c" name="post:\contacts:application\json:Router"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="bb85ee76-f2fb-4fbd-9b8b-4a9510522f3e" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postcontactsapplicationjsonRoutertest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\contacts\(id)\contactInfo:application\json:Router-test" doc:id="f90ab8b1-fb6b-4a19-85d2-8553d99d0b50" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="03196029-5c86-46c2-b566-105075c80c2d" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postcontactsidcontactInfoapplicationjsonRoutertest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postcontactsidcontactInfoapplicationjsonRoutertest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://postcontactsidcontactInfoapplicationjsonRoutertest/set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\contacts\(id)\contactInfo:application\json:Router" doc:id="d7df7096-699b-426c-9809-ddbe980485e2" name="post:\contacts\(id)\contactInfo:application\json:Router"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="8678f4ae-60b3-41a1-a0b3-b1e8e4d69e55" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postcontactsidcontactInfoapplicationjsonRoutertest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post:\contacts\(id)\address:application\json:Router-test" doc:id="01b922ee-d8a4-4783-96c8-4904d9cf7133" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="0345167f-172c-43b0-ab6f-a1a70f15aac6" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://postcontactsidaddressapplicationjsonRoutertest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://postcontactsidaddressapplicationjsonRoutertest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://postcontactsidaddressapplicationjsonRoutertest/set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\contacts\(id)\address:application\json:Router" doc:id="c38ca2a8-3640-4ea0-9bc1-aa418f74501c" name="post:\contacts\(id)\address:application\json:Router"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c407a5e4-6e99-497c-bfe7-1c3dc3b55fb2" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import postcontactsidaddressapplicationjsonRoutertest::assert_expression_payload
 ---
 assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
 			</munit-tools:assert>
